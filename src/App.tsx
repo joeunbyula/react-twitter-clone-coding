@@ -4,16 +4,17 @@ import Home from "./routes/home.tsx";
 import Profile from "./routes/profile.tsx";
 import Login from "./routes/login.tsx";
 import CreateAccount from "./routes/create-account.tsx";
-import {createGlobalStyle} from "styled-components";
+import styled, {createGlobalStyle} from "styled-components";
 import reset from "styled-reset";
 import {useEffect, useState} from "react";
 import LoadingScreen from "./components/loading-screen.tsx";
-import {auth} from "./firebase.tsx";
+import {auth} from "./firebase";
+import ProtectedRoute from "./components/protected-route.tsx";
 
 const router = createBrowserRouter([
   {
     path:"/"
-    , element: <Layout/>
+    , element: <ProtectedRoute><Layout/></ProtectedRoute>
     , children: [
       {
         path: ""
@@ -21,7 +22,7 @@ const router = createBrowserRouter([
       },
       {
         path: "profile"
-        , element: <Profile/>
+        , element:  <Profile/>
       }
     ]
   },
@@ -47,6 +48,12 @@ const GlobalStyles=createGlobalStyle`
     Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue';
   }
 `
+
+const Wrapper = styled.div`
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+`;
 function App() {
   const [isLoading, setLoading] = useState(true);
   const init = async () => {
@@ -59,10 +66,10 @@ function App() {
     init();
   }, []);
   return (
-    <>
+    <Wrapper>
       <GlobalStyles/>
       {isLoading ? <LoadingScreen/> : <RouterProvider router={router}/>}
-    </>
+    </Wrapper>
   )
 }
 
