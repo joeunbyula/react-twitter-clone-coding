@@ -11,6 +11,7 @@ export const Wrapper = styled.div`
 
 export const Title = styled.h1`
   font-size: 42px;
+  margin-bottom: 10px;
 `;
 
 export const Form = styled.form`
@@ -23,6 +24,7 @@ export const Form = styled.form`
 `;
 
 export const Input = styled.input`
+  margin-bottom: 10px;
   padding: 10px 20px;
   border-radius: 50px;
   border: none;

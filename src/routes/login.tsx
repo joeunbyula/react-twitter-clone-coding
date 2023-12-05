@@ -5,6 +5,7 @@ import {FirebaseError} from "firebase/app";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import {auth} from "../firebase.tsx";
 import {Error, Input, Switcher, Title, Wrapper} from "../components/auth-components.tsx";
+import GithubButton from "../components/github-btn.tsx";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -53,6 +54,7 @@ export default function Login() {
             Don't have an account? {" "}
             <Link to="/create-account">Create one &rarr;</Link>
         </Switcher>
+        <GithubButton/>
     </Wrapper>;
 
 }

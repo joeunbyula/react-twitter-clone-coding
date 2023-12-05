@@ -5,37 +5,38 @@ import {auth} from "../firebase.tsx";
 import {Form, Link, useNavigate} from "react-router-dom";
 import { FirebaseError } from "firebase/app";
 import {Error, Input, Switcher, Title, Wrapper} from "../components/auth-components.tsx";
+import GithubButton from "../components/github-btn.tsx";
 
 const errors = {
     "auth/email-already-in-use" : "That email already exist."
 }
 
+const initialValue = {
+    isLoading: false
+    , name: ""
+    , email: ""
+    , password: ""
+    , error: ""
+}
+
 export default function CreateAccount() {
     const navigate = useNavigate();
-    const [isLoading, setLoading] = useState(false);
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [inputValues, setInputValues] = useState(initialValue);
+    const {isLoading, name, error, password, email} = inputValues;	//비구조화 할당
+
     const onChange = (e : React.ChangeEvent<HTMLInputElement>) => {
-        const {target: {name,value}} = e;
-        if(name === "name") {
-            setName(value);
-        } else if(name === "email") {
-            setEmail(value);
-        } else if(name === "password") {
-            setPassword(value);
-        }
+        const {value, name:inputName} = e.target;
+        setInputValues({...inputValues, [inputName]:value});
+
     }
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         console.log(name, email, password);
         e.preventDefault();
-        setError("");
-
+        inputValues["error"] = "";
         if(isLoading || name === "" || email === "" || password === "") return;
 
         try {
-            setLoading(true);
+            inputValues["isLoading"] = true;
             //create and account
             const credentials = await createUserWithEmailAndPassword(auth, email,password);
             console.log(credentials.user);
@@ -47,10 +48,10 @@ export default function CreateAccount() {
             navigate("/");
         } catch (e) {
             if(e instanceof FirebaseError) {
-                setError(e.message)
+                inputValues["error"] = e.message;
             }
         } finally {
-            setLoading(false);
+            inputValues["isLoading"] = false;
         }
     }
     return <Wrapper>
@@ -66,6 +67,7 @@ export default function CreateAccount() {
             Already have have an account? {" "}
             <Link to="/login">login &rarr;</Link>
         </Switcher>
+        <GithubButton/>
     </Wrapper>;
 
 }
