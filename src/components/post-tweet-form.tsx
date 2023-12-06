@@ -98,7 +98,7 @@ export default function PostTweetForm() {
             setTweet("");
             setFile(null);
         }catch (e) {
-            console.log(e.message)
+            console.log(e)
         } finally {
             setLoading(false);
         }
