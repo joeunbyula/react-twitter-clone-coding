@@ -1,4 +1,5 @@
 import {
+    Unsubscribe,
     collection,
     /*  getDocs, */
     limit,
@@ -9,7 +10,6 @@ import {
 import {useEffect, useState} from "react";
 import styled from "styled-components";
 import {db} from "../firebase.tsx";
-import { getDocs } from "firebase/firestore";
 import Tweet from "./tweet.tsx";
 
 export interface ITweet {
@@ -30,27 +30,45 @@ const Wrapper = styled.div`
 
 export default function Timeline() {
     const [tweets, setTweets] = useState<ITweet[]>([]);
-    const fetchTweets = async () => {
-        const tweetsQuery = query(
-            collection(db,"tweets"),
-            orderBy("createdAt")
-        );
-        const snapshot = await getDocs(tweetsQuery);
-        const tweets = snapshot.docs.map(doc=> {
-          const {tweet, userId, username, createdAt, photo} = doc.data();
-          return {
-              tweet
-              , userId
-              , username
-              , createdAt
-              , photo
-              , id:doc.id
-          };
-        });
-        setTweets(tweets);
-    }
+
     useEffect(() => {
+        let unsubscirbe : Unsubscribe | null = null;
+        const fetchTweets = async () => {
+            const tweetsQuery = query(
+                collection(db, "tweets"),
+                orderBy("createdAt")
+            );
+            // const snapshot = await getDocs(tweetsQuery);
+            // const tweets = snapshot.docs.map(doc=> {
+            //   const {tweet, userId, username, createdAt, photo} = doc.data();
+            //   return {
+            //       tweet
+            //       , userId
+            //       , username
+            //       , createdAt
+            //       , photo
+            //       , id:doc.id
+            //   };
+            // });
+            unsubscirbe = await onSnapshot(tweetsQuery, (snapshot) => {
+                const tweets = snapshot.docs.map(doc => {
+                    const {tweet, userId, username, createdAt, photo} = doc.data();
+                    return {
+                        tweet
+                        , userId
+                        , username
+                        , createdAt
+                        , photo
+                        , id: doc.id
+                    }
+                });
+                setTweets(tweets);
+            });
+        };
         fetchTweets();
+        return () => {
+            unsubscirbe && unsubscirbe();
+        }
     }, []);
     return <Wrapper>
         {tweets.map((tweet) => (
