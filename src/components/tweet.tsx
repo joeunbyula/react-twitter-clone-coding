@@ -125,13 +125,14 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
         e.preventDefault();
         if(user?.uid !== userId) return;
         if(!user || isLoading || updateTweet === "" || updateTweet.length > 180) return;
+        tweet = updateTweet;
         try{
-            const docRef = doc(db,"tweets",user?.uid);
+            const docRef = doc(db,"tweets",id);
             setLoading(true);
             await updateDoc(docRef, {
-                updateTweet,
+                tweet,
                 updatedAt:Date.now(),
-                usename: user.displayName || "Anonymous",
+                username: user.displayName || "Anonymous",
                 userId: user.uid
             })
 
@@ -145,6 +146,7 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
             }
 
             setFile(null);
+
 
         } catch (e) {
             console.log(e);
