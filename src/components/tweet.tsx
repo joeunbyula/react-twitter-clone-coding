@@ -1,9 +1,9 @@
 import { styled } from "styled-components";
 import { ITweet } from "./timeline";
 import {auth, db, storage} from "../firebase";
-import {collection, deleteDoc, doc, updateDoc} from "firebase/firestore";
+import { deleteDoc, doc, updateDoc} from "firebase/firestore";
 import {deleteObject, getDownloadURL, ref, uploadBytes} from "firebase/storage";
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 
 const Wrapper = styled.div`
   display: grid;
@@ -87,6 +87,7 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     const user = auth.currentUser;
     const [isEdit, setIsEdit] = useState(false);
     const [updateTweet, setUpdateTweet] = useState(tweet);
+    const [updatePhoto, setUpdatePhoto]:any = useState(null);
     const [isLoading, setLoading] = useState(false);
     const [file, setFile] = useState<File|null>(null);
 
@@ -108,6 +109,8 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     const onIsEdit = () => {
         if(user?.uid !== userId) return;
         setIsEdit((status: boolean)=>!status);
+        setUpdatePhoto(null);
+        setUpdateTweet(tweet);
     }
 
     const onChange = (e:React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -117,7 +120,13 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     const onFileChange = (e:React.ChangeEvent<HTMLInputElement>) => {
         const { files } = e.target;
         if(files && files.length === 1) {
+            const file = files[0];
             setFile(files[0]);
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                setUpdatePhoto(reader.result);
+            };
         }
     }
 
@@ -144,9 +153,7 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
                     photo: url
                 })
             }
-
             setFile(null);
-
 
         } catch (e) {
             console.log(e);
@@ -184,11 +191,21 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
             </Column>
             <Column>
                 <PhotoUpload htmlFor="photo">
-                {photo ? <Photo src={photo}/>
-                    : <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                    </svg>
+                {photo ?
+                    <>
+                        {updatePhoto&&isEdit ? <Photo src={updatePhoto}/>
+                            : <Photo src={photo}/>
+                        }
+                    </>
+                    : <>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+                             stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round"
+                                  d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
+                        </svg>
+                    </>
                 }
+
                 </PhotoUpload>
                 {isEdit ?
                 <PhotoInput
